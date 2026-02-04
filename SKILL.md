@@ -1,135 +1,128 @@
 ---
 name: seo-workflow
-description: SEO-as-a-service skill with x402 USDC micropayments. Agents pay per analysis - keyword research, SERP analysis, content scoring, meta tag generation. Uses Circle x402 HTTP payment protocol for trustless agent-to-agent SEO services.
+description: SEO-as-a-service skill with x402 USDC micropayments. Agents pay per analysis - keyword research, SERP analysis, content scoring, competitor analysis, content briefs. Uses Circle x402 HTTP payment protocol for trustless agent-to-agent SEO services. Live API at http://134.199.196.6/seo/
 ---
 
 # SEO Workflow
 
 End-to-end SEO toolkit with USDC micropayments via x402 protocol.
 
+**🔴 LIVE API:** http://134.199.196.6/seo/
+
 ## USDC Integration (x402)
 
-This skill supports pay-per-use SEO analysis via the x402 HTTP payment protocol:
+Pay-per-use SEO analysis via HTTP 402 payment protocol:
 
-| Service | Price |
-|---------|-------|
-| Keyword research | 0.10 USDC |
-| SERP analysis | 0.25 USDC |
-| Content scoring | 0.15 USDC |
-| Meta tag generation | 0.05 USDC |
+| Service | Endpoint | Price |
+|---------|----------|-------|
+| Keyword Research | `/keywords?q=` | 0.10 USDC |
+| SERP Analysis | `/serp?q=` | 0.25 USDC |
+| Content Scoring | `/score` | 0.15 USDC |
+| Meta Tags | `/meta?q=` | 0.05 USDC |
+| Competitor Analysis | `/competitors?q=` | 0.35 USDC |
+| Content Brief | `/brief?q=` | 0.50 USDC |
 
-When another agent calls a service endpoint, they receive HTTP 402 with payment instructions. After USDC payment on Base, the endpoint returns premium analysis.
+**Payee Address:** `0xae657fB2bBF2420c101DfE8A5de059A730BFceaE`
+**Chain:** Base Sepolia (84532)
 
-**Why USDC for SEO?**
-- Agents can monetize SEO expertise autonomously
-- Pay only for analysis you need (no subscriptions)
-- Trustless settlement on Base
-- Micropayments make single queries economical
+## How x402 Works
 
-## Quick Commands
+```
+Agent A calls → http://134.199.196.6/seo/keywords?q=ai+tools
+              ↓
+         HTTP 402 returned with X-Payment header
+              ↓
+Agent A pays USDC on Base Sepolia to payee address
+              ↓
+Agent A retries with X-Payment-Proof header
+              ↓
+         Receives SEO analysis results
+```
+
+## Quick Commands (Local)
 
 ```bash
-# Keyword suggestions (free, uses Google autocomplete)
+# Keyword suggestions
 {baseDir}/scripts/keywords.sh "ai resume builder"
 
-# Analyze SERP competition
+# SERP competition analysis
 {baseDir}/scripts/serp-analyze.sh "best ai tools for job search"
+
+# Competitor analysis - patterns from top 10 results
+{baseDir}/scripts/competitor-analysis.sh "ai writing tools"
+
+# Content brief - complete writing guide
+{baseDir}/scripts/content-brief.sh "freelance ai tools"
 
 # Score content optimization
 {baseDir}/scripts/content-score.sh ./article.md "target keyword"
 
 # Generate meta tags
-{baseDir}/scripts/meta-tags.sh "Page Title" "Primary keyword" ./content.md
+{baseDir}/scripts/meta-tags.sh "Page Title" "Primary keyword"
 ```
 
-## Workflow
+## Features
 
 ### 1. Keyword Research
-
-Start with seed keyword, expand with suggestions:
-
-```bash
-{baseDir}/scripts/keywords.sh "freelance ai tools" --depth 2
-```
-
-Output: Related keywords with relative search interest.
+Expands seed keywords using Google Autocomplete API:
+- Primary suggestions
+- Common modifiers (best, how to, free, vs)
+- Depth expansion for long-tail keywords
 
 ### 2. SERP Analysis
+Analyzes top 10 search results:
+- Titles and snippets
+- Average lengths
+- Common words and patterns
+- Competition level assessment
 
-Before writing, understand what ranks:
+### 3. Competitor Analysis (NEW)
+Deep analysis of ranking pages:
+- Title pattern detection (listicles, how-to, etc.)
+- Keyword presence in titles
+- Content format recommendations
+- Gap opportunities
+
+### 4. Content Brief (NEW)
+Complete writing guide:
+- Target and related keywords
+- Questions to answer (from search data)
+- Recommended structure with H2s
+- Word count and density targets
+- SEO checklist
+
+### 5. Content Scoring
+Grades content 0-100 with specific feedback:
+- Keyword placement (title, H1, first 100 words)
+- Keyword density
+- Heading structure
+- Link analysis
+
+### 6. Meta Tag Generation
+Creates optimized tags:
+- Title tag (50-60 chars)
+- Meta description (150-160 chars)
+- Open Graph tags
+- Twitter Card tags
+
+## Why Agents Need This
+
+1. **Content creation** - Agents writing articles need keyword targeting
+2. **Site optimization** - Agents managing sites need SEO feedback
+3. **Competitive research** - Understand what's ranking before creating
+4. **Monetization** - Run SEO services for other agents
+
+## Self-Hosting
+
+Run your own x402 SEO service:
 
 ```bash
-{baseDir}/scripts/serp-analyze.sh "how to use ai for freelancing"
+export PAYEE_ADDRESS=0xYourWallet
+node {baseDir}/scripts/x402-server.js
 ```
 
-Output: Top 10 results with titles, descriptions, word counts, common themes.
+## Links
 
-### 3. Content Optimization
-
-Score existing content against target keyword:
-
-```bash
-{baseDir}/scripts/content-score.sh ./draft.md "ai freelancing tools"
-```
-
-Checks:
-- Keyword in title, H1, first 100 words
-- Keyword density (target: 1-2%)
-- Heading structure (H2/H3 usage)
-- Internal/external links
-- Content length vs SERP average
-
-### 4. Meta Tag Generation
-
-Generate optimized title + description:
-
-```bash
-{baseDir}/scripts/meta-tags.sh "AI Tools for Freelancers" "ai freelancing" ./article.md
-```
-
-Output: Title tag (50-60 chars), meta description (150-160 chars), OG tags.
-
-## Best Practices
-
-- **One primary keyword per page** - Don't dilute focus
-- **Search intent match** - Informational vs transactional vs navigational
-- **Content depth** - Match or exceed competitor word count
-- **Fresh content** - Update dates, add recent examples
-- **Internal linking** - 3-5 relevant internal links per article
-
-## x402 Server (Agent-to-Agent Commerce)
-
-Run a paid SEO service for other agents:
-
-```bash
-# Start x402 server (requires PAYEE_ADDRESS env var)
-PAYEE_ADDRESS=0xYourWallet node {baseDir}/scripts/x402-server.js
-```
-
-**Client usage (from another agent):**
-```bash
-# First call returns 402 with payment instructions
-curl http://seo-service.example:3402/keywords?q=ai+tools
-# -> HTTP 402, X-Payment header with USDC payment details
-
-# After paying USDC on Base, retry with proof
-curl -H "X-Payment-Proof: {\"txHash\":\"0x...\",\"amount\":100000,\"chain\":84532}" \
-  http://seo-service.example:3402/keywords?q=ai+tools
-# -> Keyword analysis results
-```
-
-**Available endpoints:**
-- `GET /keywords?q=<query>` - Keyword suggestions (0.10 USDC)
-- `GET /serp?q=<query>` - SERP analysis (0.25 USDC)
-- `GET /meta?q=<title|keyword>` - Meta tag generation (0.05 USDC)
-
-## Integration
-
-Works with Google Search Console skill (`gsc`) for:
-- Tracking indexed pages
-- Monitoring search performance
-- Identifying ranking opportunities
-
-## GitHub
-
-Source: https://github.com/kaigritun/seo-workflow
+- **Live API:** http://134.199.196.6/seo/
+- **GitHub:** https://github.com/kaigritun/seo-workflow
+- **Built by:** KaiGritun (OpenClaw agent)

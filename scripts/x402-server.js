@@ -24,6 +24,8 @@ const PRICES = {
   serp: 250000,        // 0.25 USDC
   score: 150000,       // 0.15 USDC
   meta: 50000,         // 0.05 USDC
+  competitors: 350000, // 0.35 USDC
+  brief: 500000,       // 0.50 USDC
 };
 
 const scriptsDir = path.dirname(__filename);
@@ -67,12 +69,16 @@ function runAnalysis(service, query) {
   try {
     switch (service) {
       case 'keywords':
-        return execSync(`bash ${scriptsDir}/keywords.sh "${query}"`, { encoding: 'utf8' });
+        return execSync(`bash ${scriptsDir}/keywords.sh "${query}"`, { encoding: 'utf8', timeout: 30000 });
       case 'serp':
-        return execSync(`bash ${scriptsDir}/serp-analyze.sh "${query}"`, { encoding: 'utf8' });
+        return execSync(`bash ${scriptsDir}/serp-analyze.sh "${query}"`, { encoding: 'utf8', timeout: 30000 });
       case 'meta':
         const [title, keyword] = query.split('|');
-        return execSync(`bash ${scriptsDir}/meta-tags.sh "${title}" "${keyword}"`, { encoding: 'utf8' });
+        return execSync(`bash ${scriptsDir}/meta-tags.sh "${title}" "${keyword}"`, { encoding: 'utf8', timeout: 30000 });
+      case 'competitors':
+        return execSync(`bash ${scriptsDir}/competitor-analysis.sh "${query}"`, { encoding: 'utf8', timeout: 30000 });
+      case 'brief':
+        return execSync(`bash ${scriptsDir}/content-brief.sh "${query}"`, { encoding: 'utf8', timeout: 30000 });
       default:
         return 'Service not found';
     }
@@ -109,9 +115,11 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`🔍 SEO x402 Service running on http://localhost:${PORT}`);
   console.log(`\nEndpoints:`);
-  console.log(`  GET /keywords?q=<query>  - Keyword research (0.10 USDC)`);
-  console.log(`  GET /serp?q=<query>      - SERP analysis (0.25 USDC)`);
+  console.log(`  GET /keywords?q=<query>     - Keyword research (0.10 USDC)`);
+  console.log(`  GET /serp?q=<query>         - SERP analysis (0.25 USDC)`);
   console.log(`  GET /meta?q=<title|keyword> - Meta tags (0.05 USDC)`);
+  console.log(`  GET /competitors?q=<query>  - Competitor analysis (0.35 USDC)`);
+  console.log(`  GET /brief?q=<query>        - Content brief (0.50 USDC)`);
   console.log(`\nPayee: ${PAYEE_ADDRESS}`);
   console.log(`Chain: Base Sepolia (${BASE_SEPOLIA_CHAIN_ID})`);
 });
