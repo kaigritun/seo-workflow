@@ -26,6 +26,7 @@ const PRICES = {
   meta: 50000,         // 0.05 USDC
   competitors: 350000, // 0.35 USDC
   brief: 500000,       // 0.50 USDC
+  audit: 1000000,      // 1.00 USDC - full comprehensive audit
 };
 
 const scriptsDir = path.dirname(__filename);
@@ -79,6 +80,8 @@ function runAnalysis(service, query) {
         return execSync(`bash ${scriptsDir}/competitor-analysis.sh "${query}"`, { encoding: 'utf8', timeout: 30000 });
       case 'brief':
         return execSync(`bash ${scriptsDir}/content-brief.sh "${query}"`, { encoding: 'utf8', timeout: 30000 });
+      case 'audit':
+        return execSync(`bash ${scriptsDir}/full-audit.sh "${query}"`, { encoding: 'utf8', timeout: 120000 });
       default:
         return 'Service not found';
     }
@@ -120,6 +123,7 @@ server.listen(PORT, () => {
   console.log(`  GET /meta?q=<title|keyword> - Meta tags (0.05 USDC)`);
   console.log(`  GET /competitors?q=<query>  - Competitor analysis (0.35 USDC)`);
   console.log(`  GET /brief?q=<query>        - Content brief (0.50 USDC)`);
+  console.log(`  GET /audit?q=<query>        - FULL AUDIT (1.00 USDC)`);
   console.log(`\nPayee: ${PAYEE_ADDRESS}`);
   console.log(`Chain: Base Sepolia (${BASE_SEPOLIA_CHAIN_ID})`);
 });
